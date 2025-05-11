@@ -33,7 +33,7 @@ class AuthService:
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=True,
+            secure=False,  # Set to True in production
             samesite="Lax",
             path="/"
         )
@@ -84,7 +84,7 @@ class AuthService:
             key="refresh_token",
             value=new_refresh_token,
             httponly=True,
-            secure=True,
+            secure=False,  # Set to True in production
             samesite="Lax",
             path="/"
         )

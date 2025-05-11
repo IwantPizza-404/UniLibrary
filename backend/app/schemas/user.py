@@ -26,3 +26,16 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserProfile(UserBase):
+    id: int
+    followers_count: int
+    following_count: int
+    upvotes_count: int
+    downvotes_count: int
+    uploads_count: int
+    created_at: datetime
+    is_active: bool
+
+    class Config:
+        from_attributes = True

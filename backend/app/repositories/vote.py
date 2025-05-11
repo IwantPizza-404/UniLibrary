@@ -1,7 +1,8 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.database.models import PostVote
+from sqlalchemy.sql import func
+from app.database.models import PostVote, Post
 
 
 class VoteRepository:
@@ -15,6 +16,34 @@ class VoteRepository:
             return result.scalar_one_or_none()
         except Exception as e:
             raise
+    
+    @staticmethod
+    async def get_upvotes_count(db: AsyncSession, user_id: int) -> int:
+        """Get the number of upvotes for a given user."""
+        result = await db.execute(
+            select(func.count())
+            .select_from(PostVote)
+            .join(Post, Post.id == PostVote.post_id)
+            .filter(
+                Post.author_id == user_id,
+                PostVote.is_upvote == True
+            )
+        )
+        return result.scalar() or 0
+    
+    @staticmethod
+    async def get_downvotes_count(db: AsyncSession, user_id: int) -> int:
+        """Get the number of downvotes for a given user."""
+        result = await db.execute(
+            select(func.count())
+            .select_from(PostVote)
+            .join(Post, Post.id == PostVote.post_id)
+            .filter(
+                Post.author_id == user_id,
+                PostVote.is_upvote == False
+            )
+        )
+        return result.scalar() or 0
 
     @staticmethod
     async def create_vote(db: AsyncSession, user_id: int, post_id: int, is_upvote: bool) -> PostVote:

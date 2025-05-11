@@ -13,15 +13,30 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
+class CategorySummary(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+class AuthorSummary(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        from_attributes = True
+
 class PostResponse(PostBase):
     id: int
-    author_id: int
     file_url: str
     created_at: datetime
     upvotes: int
     downvotes: int
     rating_percentage: float
-    user_vote: Optional[bool] = None 
+    user_vote: Optional[bool] = None
+    category: CategorySummary
+    author: AuthorSummary
 
     class Config:
         from_attributes = True

@@ -1,0 +1,30 @@
+@import './base.css';
+
+/* #app {
+  height: 100vh;
+  display: flex;
+} */
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  background: none;
+  padding: 0;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+}

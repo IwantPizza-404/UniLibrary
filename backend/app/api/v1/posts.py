@@ -53,20 +53,20 @@ async def search_posts_by_category(
 async def get_post(
     id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user_optional),  # Use optional authentication
+    current_user=Depends(get_current_user_optional),
 ):
     """
     Get a post by ID and include the user's current vote if authenticated.
     """
-    user_id = current_user.id if current_user else None  # Pass user ID if authenticated
+    user_id = current_user.id if current_user else None
     return await PostService.get_by_id(db, id, user_id=user_id)
 
-@router.get("/user/{user_id}", response_model=List[PostResponse])
+@router.get("/user/{username}", response_model=List[PostResponse])
 async def get_user_posts(
-    user_id: int,
+    username: str,
     db: AsyncSession = Depends(get_db),
 ):
-    return await PostService.get_by_user(db, user_id)
+    return await PostService.get_by_user(db, username)
 
 @router.delete("/{id}", response_model=dict)
 async def delete_post(
@@ -94,6 +94,5 @@ async def vote_post(
 ):
     """
     Vote on a post (upvote, downvote, or remove vote).
-    - `is_upvote`: True for upvote, False for downvote, None to remove vote.
     """
     return await PostService.vote(db, current_user.id, post_id, vote_data.is_upvote)

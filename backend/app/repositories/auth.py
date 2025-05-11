@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
 from app.database.models import UserSession
 from app.core.config import settings
 
@@ -20,7 +21,10 @@ class AuthRepository:
             expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
         db.add(db_token)
-        await db.commit()
+        try:
+            await db.commit()
+        except IntegrityError:
+            await db.rollback()
 
     @staticmethod
     async def revoke_refresh_token(db: AsyncSession, token: str):

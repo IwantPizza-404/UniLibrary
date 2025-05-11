@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.sql import func
 from app.database.models import UserFollow
 
 class UserFollowRepository:
@@ -39,6 +40,16 @@ class UserFollowRepository:
             select(UserFollow).filter(UserFollow.following_id == user_id).limit(limit).offset(offset)
         )
         return result.scalars().all()
+    
+    @staticmethod
+    async def get_followers_count(db: AsyncSession, user_id: int) -> int:
+        """
+        Get the number of followers for a given user.
+        """
+        result = await db.execute(
+            select(func.count()).filter(UserFollow.following_id == user_id)
+        )
+        return result.scalar() or 0
 
     @staticmethod
     async def get_following(db: AsyncSession, user_id: int, limit: int, offset: int):
@@ -49,3 +60,13 @@ class UserFollowRepository:
             select(UserFollow).filter(UserFollow.follower_id == user_id).limit(limit).offset(offset)
         )
         return result.scalars().all()
+    
+    @staticmethod
+    async def get_following_count(db: AsyncSession, user_id: int) -> int:
+        """
+        Get the number of following for a given user.
+        """
+        result = await db.execute(
+            select(func.count()).filter(UserFollow.follower_id == user_id)
+        )
+        return result.scalar() or 0

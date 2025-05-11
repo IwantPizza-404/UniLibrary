@@ -1,47 +1,35 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div class="app-container">
+    <Header />
+    <div class="main-layout">
+      <Sidebar />
+      <div class="main-content">
+        <RouterView />
+      </div>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script setup>
+import { RouterView } from 'vue-router'
+import Sidebar from '@/components/layout/Sidebar.vue';
+import Header from '@/components/layout/Header.vue';
+
+</script>
+
+<style>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.main-layout {
+  display: flex;
+  flex: 1;
 }
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.main-content {
+  flex: 1;
+  background-color: #f8f9fa;
+  overflow-y: auto;
 }
 </style>

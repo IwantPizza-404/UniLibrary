@@ -34,6 +34,16 @@ class UserRepository:
         """Retrieve a user by their ID."""
         result = await db.execute(select(User).filter(User.id == user_id))
         return result.scalar_one_or_none()
+    
+    @staticmethod
+    async def get_by_username(db: AsyncSession, username: str) -> Optional[User]:
+        """Retrieve a user by their username."""
+        result = await db.execute(
+            select(User).filter(
+                (User.username == username)
+            )
+        )
+        return result.scalar_one_or_none()
 
     @staticmethod
     async def get_by_email_or_username(db: AsyncSession, username_or_email: str) -> Optional[User]:
