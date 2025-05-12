@@ -30,3 +30,23 @@ export const votePost = async (post_id, is_upvote) => {
     return null;
   }
 };
+
+export const createPost = async (formData, onProgress) => {
+  try {
+    const response = await api.post('posts/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.lengthComputable && onProgress) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percentCompleted);
+        }
+      }
+    });
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to upload post');
+    return null;
+  }
+};

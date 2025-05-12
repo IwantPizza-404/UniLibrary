@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <Header />
+    <Header v-if="$route.meta.showUI"/>
     <div class="main-layout">
-      <Sidebar />
+      <Sidebar v-if="$route.meta.showUI"/>
       <div class="main-content">
         <RouterView />
       </div>
@@ -14,7 +14,6 @@
 import { RouterView } from 'vue-router'
 import Sidebar from '@/components/layout/Sidebar.vue';
 import Header from '@/components/layout/Header.vue';
-
 </script>
 
 <style>

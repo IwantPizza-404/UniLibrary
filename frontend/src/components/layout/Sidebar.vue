@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="toolbar">
-        <button class="btn upload-btn" @click="onUploadClick">
+        <button class="btn upload-btn" @click="$router.push('/upload')">
           <PlusIcon class="sidebar__icon"/>
           <span>New</span>
         </button>

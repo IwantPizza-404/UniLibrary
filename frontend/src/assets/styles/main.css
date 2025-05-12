@@ -20,8 +20,11 @@ a {
 a:hover {
   text-decoration: underline;
 }
-
+input {
+  font-family: var(--font-family);
+}
 button {
+  font-family: var(--font-family);
   background: none;
   padding: 0;
   color: inherit;

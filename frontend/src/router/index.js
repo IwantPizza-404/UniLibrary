@@ -8,14 +8,59 @@ import Home from '@/views/Home.vue';
 import Profile from '@/views/Profile.vue';
 import Post from '@/views/Post.vue';
 import NotFound from '@/views/NotFound.vue';
+import Upload from '@/views/Upload.vue';
+import MyLibrary from '@/views/MyLibrary.vue';
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/login', component: Login },
-  { path: '/register', component: Register },
-  { path: '/post/:post_id', component: Post },
-  { path: '/:username', component: Profile },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
+  { 
+    path: '/', 
+    name: 'home',
+    component: Home,
+    meta: { showUI: true }
+  },
+  { 
+    path: '/library', 
+    name: 'library',
+    component: MyLibrary,
+    meta: { showUI: true }
+  },
+  { 
+    path: '/login', 
+    name: 'login',
+    component: Login,
+    meta: { showUI: false }
+  },
+  { 
+    path: '/register',
+    name: 'register',
+    component: Register,
+    meta: { showUI: false }
+  },
+  { 
+    path: '/upload',
+    name: 'upload',
+    component: Upload,
+    meta: { showUI: false, requiresAuth: true }
+  },
+  { 
+    path: '/post/:post_id',
+    name: 'post',
+    component: Post,
+    meta: { showUI: true }
+  },
+  { 
+    path: '/:username',
+    name: 'profile',
+    component: Profile,
+    meta: { showUI: true }
+
+  },
+  { 
+    path: '/:pathMatch(.*)*', 
+    name: 'NotFound', 
+    component: NotFound,
+    meta: { showUI: true }
+  },
 ];
 
 const router = createRouter({
