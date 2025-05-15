@@ -50,3 +50,58 @@ export const createPost = async (formData, onProgress) => {
     return null;
   }
 };
+
+// New functions for Home page
+
+export const fetchPopularPosts = async (skip = 0, limit = 6) => {
+  try {
+    const response = await api.get(`posts?skip=${skip}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to fetch popular posts');
+    return [];
+  }
+};
+
+export const fetchFollowingPosts = async (skip = 0, limit = 6) => {
+  try {
+    const response = await api.get(`posts/following?skip=${skip}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to fetch following posts');
+    // Note: This might fail if the endpoint isn't implemented yet
+    return [];
+  }
+};
+
+export const fetchPostsByCategory = async (categoryId, skip = 0, limit = 6) => {
+  try {
+    const response = await api.get(`posts/category/${categoryId}?skip=${skip}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to fetch posts by category');
+    return [];
+  }
+};
+
+export const searchPosts = async (query, skip = 0, limit = 6) => {
+  try {
+    const response = await api.get(`posts/search?q=${encodeURIComponent(query)}&skip=${skip}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to search posts');
+    return [];
+  }
+};
+
+export const downloadPost = async (postId) => {
+  try {
+    const response = await api.get(`posts/${postId}/download`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  } catch (error) {
+    handleError(error, 'Failed to download file');
+    return null;
+  }
+};
