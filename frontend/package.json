@@ -13,6 +13,7 @@
     "axios-auth-refresh": "^3.3.6",
     "mammoth": "^1.9.0",
     "pinia": "^3.0.2",
+    "swiper": "^11.2.8",
     "vue": "^3.5.13",
     "vue-auth3": "^1.1.0",
     "vue-router": "^4.5.1"

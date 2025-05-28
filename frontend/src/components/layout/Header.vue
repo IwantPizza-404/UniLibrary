@@ -134,17 +134,19 @@ const handleLogout = () => {
 }
 
 .search-input {
-  width: 300px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db; /* Light gray border */
-  border-radius: 8px;
-  font-size: 1rem;
+  max-width: 480px;
+  width: 100%;
+  height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-color); /* Light gray border */
+  border-radius: 25px;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .search-input:focus {
-  border-color: #1d4ed8; /* Blue border on focus */
+  border-color: var(--primary-color); /* Blue border on focus */
 }
 
 /* Navigation links */
