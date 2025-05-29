@@ -8,14 +8,18 @@ class UserSession(Base):
     __tablename__ = "user_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     refresh_token = Column(String, unique=True, nullable=False)
     device_id = Column(String, nullable=False)
     ip_address = Column(String, nullable=False)
     user_agent = Column(String, nullable=True)
     is_revoked = Column(Boolean, default=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_used_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    revoked_at = Column(DateTime(timezone=True), nullable=True)
+
+    user = relationship("User", back_populates="sessions")
 
 class UserFollow(Base):
     __tablename__ = "user_follows"
@@ -43,6 +47,7 @@ class User(Base):
     posts = relationship("Post", back_populates="author", cascade="all, delete")
     followers = relationship("UserFollow", foreign_keys=[UserFollow.following_id], back_populates="following", cascade="all, delete")
     following = relationship("UserFollow", foreign_keys=[UserFollow.follower_id], back_populates="follower", cascade="all, delete")
+    sessions = relationship("UserSession", back_populates="user", cascade="all, delete")
 
 class Category(Base):
     __tablename__ = "categories"

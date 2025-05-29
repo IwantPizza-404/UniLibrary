@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user import UserRepository
@@ -43,7 +44,7 @@ class UserService:
             )
 
     @staticmethod
-    async def get_profile(db: AsyncSession, username: str) -> UserProfile:
+    async def get_profile(db: AsyncSession, username: str, user_id: Optional[int] = None) -> UserProfile:
         """Get a profile of a user by their username"""
         user = await UserRepository.get_by_username(db, username)
 
@@ -58,6 +59,10 @@ class UserService:
         uploads_count = await PostRepository.get_posts_count(db, user.id)
         upvotes_count = await VoteRepository.get_upvotes_count(db, user.id)
         downvotes_count = await VoteRepository.get_downvotes_count(db, user.id)
+
+        is_following = None
+        if user_id:
+            is_following = await UserFollowRepository.is_following(db, user_id, user.id)
         
         user_profile = UserProfile(
             id=user.id,
@@ -71,5 +76,6 @@ class UserService:
             downvotes_count=downvotes_count,
             created_at=user.created_at,
             is_active=user.is_active,
+            is_following=is_following,
         )
         return user_profile

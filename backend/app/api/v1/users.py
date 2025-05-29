@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.deps import get_current_user
+from app.core.deps import get_current_user, get_current_user_optional
 from app.database.session import get_db
 from app.schemas.user import UserResponse, UserUpdate, UserProfile
 from app.schemas.post import PostResponse
@@ -48,6 +48,11 @@ async def get_user_profile(
     return await UserService.get_profile(db, current_user.username)
 
 @router.get("/{username}/profile", response_model=UserProfile)
-async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
+async def get_user_profile(
+    username: str, 
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user_optional),
+):
     """ Get the user's profile """
-    return await UserService.get_profile(db, username)
+    user_id = current_user.id if current_user else None
+    return await UserService.get_profile(db, username, user_id=user_id)

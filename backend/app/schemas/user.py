@@ -36,6 +36,7 @@ class UserProfile(UserBase):
     uploads_count: int
     created_at: datetime
     is_active: bool
+    is_following: Optional[bool] = None
 
     class Config:
         from_attributes = True

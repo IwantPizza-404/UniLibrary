@@ -70,3 +70,16 @@ class UserFollowRepository:
             select(func.count()).filter(UserFollow.follower_id == user_id)
         )
         return result.scalar() or 0
+    
+    @staticmethod
+    async def is_following(db: AsyncSession, follower_id: int, following_id: int) -> bool:
+        """
+        Check whether user follows.
+        """
+        result = await db.execute(
+            select(UserFollow).filter(
+                UserFollow.follower_id == follower_id,
+                UserFollow.following_id == following_id
+            )
+        )
+        return result.scalar_one_or_none() is not None
