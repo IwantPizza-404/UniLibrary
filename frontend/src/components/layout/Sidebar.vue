@@ -17,15 +17,15 @@
       </div>
       <div class="user-stats">
         <div class="stat-item">
-          <span class="stat__value">{{ profile.followers_count}}</span>
+          <span class="stat__value">{{ profile.followers_count }}</span>
           <span class="stat__label">Followers</span>
         </div>
         <div class="stat-item">
-          <span class="stat__value">{{ profile.uploads_count}}</span>
+          <span class="stat__value">{{ profile.uploads_count }}</span>
           <span class="stat__label">Uploads</span>
         </div>
         <div class="stat-item">
-          <span class="stat__value">{{ profile.upvotes_count}}</span>
+          <span class="stat__value">{{ profile.upvotes_count }}</span>
           <span class="stat__label">Upvotes</span>
         </div>
       </div>
@@ -112,10 +112,6 @@ const navItems = [
   { to: '/library', label: 'My Library', icon: LibraryIcon },
   { to: '/explore', label: 'Explore', icon: ExploreIcon }
 ];
-
-const onUploadClick = () => {
-  // Upload logic here
-};
 </script>
 
 <style scoped>

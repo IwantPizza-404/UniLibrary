@@ -1,32 +1,35 @@
 <template>
     <div v-if="loading">
         <!-- Skeleton loader -->
-        
     </div>
-    <div v-else-if="profile" class="library-page">
-        <section class="content-section">
-            <div class="container">
-                <section class="section upload-block">
-                    <h2 class="section-title">Start your contribution to learning</h2>
-                    <button @click="$router.push('/upload')" class="upload-area">
-                        <UploadPic/>
-                        Upload a document to start working on it
-                    </button>
-                </section>
-                <section class="section">
-                    <h2 class="section-title">My Uploads</h2>
-                    <div class="section-content">
-                        <div class="uploads-list">
-                            <router-link :to="'/post/'+post.id" v-for="(post, index) in posts" :key="post.id" class="upload-item">
-                                <DocumentIcon/>
-                                <span class="upload-title">{{ post.title }}</span>
-                                <span class="upload-tag">{{ post.category.name }}</span>
-                            </router-link>
-                        </div>
+    <div v-else class="library-page">
+        <div class="container">
+            <section class="content-section upload-block">
+                <h2 class="section-title">Start your contribution to learning</h2>
+                <button @click="$router.push('/upload')" class="upload-area">
+                    <UploadPic/>
+                    Upload a document to start working on it
+                </button>
+            </section>
+            <section class="content-section">
+                <h2 class="section-title">My Uploads</h2>
+                <div class="section-content">
+                    <div v-if="posts && isAuthenticated" class="uploads-list">
+                        <router-link :to="'/post/'+post.id" v-for="(post, index) in posts" :key="post.id" class="upload-item">
+                            <DocumentIcon/>
+                            <span class="upload-title">{{ post.title }}</span>
+                            <span class="upload-tag">{{ post.category.name }}</span>
+                        </router-link>
                     </div>
-                </section>
-            </div>
-        </section>
+                    <div v-else class="info-section">
+                        <div class="info-icon">
+                            <InfoIcon/>
+                        </div>
+                        Once you upload your first document, it will appear here.
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </template>
 
@@ -34,15 +37,17 @@
 import { ref, computed, onMounted } from 'vue';
 import { fetchUserPosts } from '@/services/postService';
 import { useAuthStore } from '@/store/authStore';
-import { DocumentIcon, LikeIcon, PlusIcon, UploadPic} from '@/components/icons'
+import { DocumentIcon, PlusIcon, UploadPic, InfoIcon} from '@/components/icons'
 
+// State variables
 const authStore = useAuthStore();
-const isAuthenticated = computed(() => authStore.isAuthenticated);
 const user = computed(() => authStore.user);
-const profile = ref([]);
 const posts = ref(null);
-const loading = ref(true);
+const loading = ref(false);
 const error = ref(null);
+
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 const loadPosts = async (username) => {
   loading.value = true;
@@ -59,9 +64,9 @@ const loadPosts = async (username) => {
 };
 
 onMounted(() => {
-  if (isAuthenticated.value) {
-    loadPosts(user.value.username);
-  }
+    if (isAuthenticated.value) {
+        loadPosts(user.value.username);
+    }
 });
 </script>
 
@@ -72,15 +77,15 @@ onMounted(() => {
     margin: 0 auto;
     padding: 0 24px;
 }
-.section {
+.library-page {
+    padding: 36px 0;
+}
+.content-section {
     padding: 32px;
     background-color: #fff;
     border-radius: 20px;
 }
-.content-section {
-    padding: 36px 0;
-}
-.section:not(:last-child) {
+.content-section:not(:last-child) {
     margin-bottom: 36px;
 }
 .section-title {
@@ -88,12 +93,12 @@ onMounted(() => {
     font-weight: 600;
     margin-bottom: 12px;
 }
-.uploads-list{
+.uploads-list {
     display: flex;
     width: 100%;
     flex-direction: column;
 }
-.upload-item{
+.upload-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -102,10 +107,10 @@ onMounted(() => {
     text-decoration: none;
     border-radius: 8px;
 }
-.upload-item:hover{
+.upload-item:hover {
     background: var(--primary-color-10);
 }
-.upload-title{
+.upload-title {
     font-size: 16px;
     font-weight: 400;
     color: var(--text-color);
@@ -113,7 +118,7 @@ onMounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.upload-tag{
+.upload-tag {
     font-size: 14px;
     font-weight: 400;
     color: #9EA9B5;
@@ -121,12 +126,12 @@ onMounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.upload-block{
+.upload-block {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.upload-area{
+.upload-area {
     align-items: center;
     border: 2px dashed;
     border-radius: 20px;
@@ -139,5 +144,27 @@ onMounted(() => {
     background-color: #f1f7fe;
     border-color: #d5e9fe;
     padding: 36px;
+}
+.info-section {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    background-color: #f1f7fe;
+    border: 1px solid #e2effd;
+}
+.info-icon {
+    background-color: var(--primary-color);
+    color: #f6f7fb;
+    align-items: center;
+    border-radius: 8px;
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 36px;
+    justify-content: center;
+    width: 36px;
 }
 </style>

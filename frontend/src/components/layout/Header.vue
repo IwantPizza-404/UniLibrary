@@ -52,9 +52,13 @@
               </svg>
             </button>
             <ul v-if="isDropdownOpen" class="dropdown-menu">
-              <li @click="handleLogout">Logout</li>
-              <li>
-                <router-link :to="'/'+user.username">Profile</router-link>
+              <li @click="$router.push('/'+user.username)">
+                Profile
+                <UserIcon/>
+              </li>
+              <li @click="handleLogout">
+                Logout
+                <LogoutIcon/>
               </li>
             </ul>
           </div>
@@ -71,6 +75,7 @@
 import { ref, computed } from 'vue';
 import { useAuthStore } from '@/store/authStore.js';
 import Logo from '@/assets/images/logo.vue';
+import { UserIcon, LogoutIcon } from '@/components/icons';
 
 // Access the authentication store
 const authStore = useAuthStore();
@@ -186,6 +191,7 @@ const handleLogout = () => {
   align-items: center;
   gap: 8px;
   position: relative;
+  cursor: pointer;
 }
 
 .profile-img {
@@ -213,11 +219,12 @@ const handleLogout = () => {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 16px);
   right: 0;
+  min-width: 165px;
   background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   list-style: none;
   padding: 8px 0;
@@ -226,12 +233,18 @@ const handleLogout = () => {
 }
 
 .dropdown-menu li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  gap: 8px;
   padding: 8px 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .dropdown-menu li:hover {
+  color: var(--primary-color);
   background-color: var(--primary-color-10);
 }
 

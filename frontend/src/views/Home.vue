@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-    <div class="main-content">
+    <div class="container">
       <!-- Popular section -->
       <section class="content-section">
         <h2 class="section-title">Popular</h2>
@@ -60,7 +60,7 @@
       </section>
 
       <!-- Following section -->
-      <section class="content-section">
+      <section v-if="isAuthenticated" class="content-section">
         <h2 class="section-title">Following</h2>
         <div v-if="loadingFollowing && !followingPosts.length" class="loading-state">
           Loading following posts...
@@ -114,66 +114,34 @@
           </swiper>
         </div>
       </section>
-
-      <!-- Explore recommendations -->
-      <section class="explore-section">
-        <div class="explore-content">
-          <div class="explore-text">
-            <h2>Explore and get</h2>
-            <p>tailored recommendations!</p>
-            <button class="explore-btn" @click="navigateToExplore">
-              Explore <span>→</span>
-            </button>
-          </div>
-          <div class="explore-graphics">
-            <div class="graphics-container">
-              <div class="graphic-icon chart-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="none" d="M0 0h24v24H0z"/>
-                  <path d="M5 3v16h16v2H3V3h2zm15.293 3.293l1.414 1.414L16 13.414l-3-2.999-4.293 4.292-1.414-1.414L13 7.586l3 2.999 4.293-4.292z" fill="#4CAF50"/>
-                </svg>
-              </div>
-              <div class="graphic-icon list-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="none" d="M0 0h24v24H0z"/>
-                  <path d="M8 4h13v2H8V4zm-5 3h2v2H3V7zm0 8h2v2H3v-2zm0-4h2v2H3v-2zm5 4h13v2H8v-2zm0-4h13v2H8v-2z" fill="#2196F3"/>
-                </svg>
-              </div>
-              <div class="graphic-icon folder-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="none" d="M0 0h24v24H0z"/>
-                  <path d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2zM4 5v14h16V7h-8.414l-2-2H4z" fill="#4CAF50"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { LikeIcon } from '@/components/icons';
 import { 
   fetchPopularPosts,
   fetchFollowingPosts
 } from '@/services/postService';
+import { useAuthStore } from '@/store/authStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Navigation, FreeMode, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
+// Swiper
 const SwiperPagination = Pagination;
 const SwiperNavigation = Navigation;
 const SwiperFreeMode = FreeMode;
 const SwiperMousewheel = Mousewheel;
 
-const router = useRouter();
-
 // State variables
+const router = useRouter();
+const authStore = useAuthStore();
+
 const popularPosts = ref([]);
 const followingPosts = ref([]);
 const loadingPopular = ref(false);
@@ -182,7 +150,11 @@ const hasMorePopular = ref(true);
 const hasMoreFollowing = ref(true);
 const popularPage = ref(1);
 const followingPage = ref(1);
-const postsPerPage = 12; // Number of items to load per page
+const postsPerPage = 12;
+
+// Computed properties
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+
 
 const loadPopularPosts = async (page = 1) => {
   if (loadingPopular.value) return;
@@ -234,11 +206,11 @@ const loadFollowingPosts = async (page = 1) => {
   } catch (err) {
     console.error('Error loading following posts:', err);
     // If the API fails or isn't implemented yet, we'll try to use popular posts as a fallback
-    if (followingPosts.value.length === 0) {
-      await loadPopularPosts(1);
-      followingPosts.value = [...popularPosts.value];
-      hasMoreFollowing.value = hasMorePopular.value;
-    }
+    // if (followingPosts.value.length === 0) {
+    //   await loadPopularPosts(1);
+    //   followingPosts.value = [...popularPosts.value];
+    //   hasMoreFollowing.value = hasMorePopular.value;
+    // }
   } finally {
     loadingFollowing.value = false;
   }
@@ -258,10 +230,6 @@ const loadMoreFollowing = () => {
 
 const navigateToPost = (postId) => {
   router.push(`/post/${postId}`);
-};
-
-const navigateToExplore = () => {
-  router.push('/explore');
 };
 
 const formatDate = (dateString) => {
@@ -307,23 +275,28 @@ const onFollowingReachEnd = () => {
   }
 };
 
-onMounted(() => {
-  loadPopularPosts(1);
-  loadFollowingPosts(1);
+onMounted(async () => {
+  await loadPopularPosts(1);
+  
+  if (isAuthenticated.value) {
+    await loadFollowingPosts(1);
+  }
 });
 </script>
 
 <style scoped>
 .home-page {
   background-color: white;
+  min-height: calc(100vh - 72px);
   width: 100%;
-  padding: 20px;
+  padding: 32px 0;
 }
 
-.main-content {
-  background: none;
+.container {
+  width: 100%;
   max-width: 1170px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
 .content-section {
@@ -428,90 +401,6 @@ onMounted(() => {
   height: 200px;
 }
 
-.explore-section {
-  background-color: #f0f9eb;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 40px;
-}
-
-.explore-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.explore-text {
-  flex: 1;
-}
-
-.explore-text h2 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.explore-text p {
-  margin: 5px 0 20px 0;
-  color: #666;
-}
-
-.explore-btn {
-  display: inline-flex;
-  align-items: center;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.explore-btn:hover {
-  background-color: #f5f5f5;
-}
-
-.explore-btn span {
-  margin-left: 5px;
-}
-
-.explore-graphics {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.graphics-container {
-  display: flex;
-  gap: 20px;
-}
-
-.graphic-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.graphic-icon svg {
-  width: 30px;
-  height: 30px;
-}
-
-.chart-icon {
-  transform: translateY(-10px);
-}
-
-.list-icon {
-  transform: translateY(10px);
-}
-
 @media (max-width: 768px) {
   .documents-grid {
     overflow-x: auto;
@@ -519,15 +408,6 @@ onMounted(() => {
   
   .document-card {
     min-width: 200px;
-  }
-  
-  .explore-content {
-    flex-direction: column;
-  }
-  
-  .explore-graphics {
-    margin-top: 20px;
-    justify-content: center;
   }
 }
 

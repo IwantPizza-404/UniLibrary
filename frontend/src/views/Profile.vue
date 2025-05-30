@@ -24,9 +24,16 @@
                             </div>
                         </div>
                         <div class="action-pannel">
-                            <button class="btn follow-btn" v-if="user?.username !== profile?.username">
-                                <PlusIcon/>
-                                Follow
+                            <button v-if="user?.username !== profile?.username" 
+                                    @click="handleFollowUser" 
+                                    :class="['btn follow-btn', { 
+                                        active: profile?.is_following,
+                                        loading: following 
+                                    }]"
+                                    :disabled="following">
+                                <span v-if="following" class="loading-spinner"></span>
+                                <PlusIcon v-else-if="!profile?.is_following"/>
+                                {{ profile?.is_following ? 'Unfollow' : 'Follow' }}
                             </button>
                         </div>
                     </div>
@@ -98,18 +105,21 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { fetchUserProfile } from '@/services/userService';
 import { fetchUserPosts } from '@/services/postService';
 import { useAuthStore } from '@/store/authStore';
 import { DocumentIcon, LikeIcon, PlusIcon} from '@/components/icons'
+import { followUser, unfollowUser } from '@/services/userFollowService';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const user = computed(() => authStore.user);
+const router = useRouter();
 const route = useRoute();
 const profile = ref([]);
 const posts = ref(null);
+const following = ref(false);
 const loading = ref(true);
 const error = ref(null);
 
@@ -120,7 +130,6 @@ const loadProfile = async (username) => {
   try {
     profile.value = await fetchUserProfile(username);
     posts.value = await fetchUserPosts(username);
-    console.log('Posts:', posts.value);
   } catch (err) {
     console.error(err);
     error.value = 'Failed to load data';
@@ -128,6 +137,38 @@ const loadProfile = async (username) => {
     loading.value = false;
   }
 };
+
+const handleFollowUser = async () => {
+    if (!isAuthenticated.value) {
+        router.push('/login');
+        return;
+    }
+    if (following.value) {
+        return;
+    }
+
+    following.value = true;
+    const previousState = profile.value.is_following;
+    const previousFollowersCount = profile.value.followers_count;
+
+    try {
+        profile.value.is_following = !previousState;
+        profile.value.followers_count = previousState 
+            ? previousFollowersCount - 1
+            : previousFollowersCount + 1;
+
+        if (!previousState) {
+            await followUser(profile.value.id);
+        } else {
+            await unfollowUser(profile.value.id);
+        }
+    } catch (err) {
+        console.error('Error processing follow/unfollow:', err);
+        error.value = 'Failed to process follow/unfollow. Please try again.';
+    } finally {
+        following.value = false;
+    }
+}
 
 // react to route param changes
 watch(
@@ -361,9 +402,38 @@ watch(
     transition: background-color 0.2s, transform 0.2s;
 }
 .follow-btn {
-    margin-top: 20px;
+    position: relative;
     background-color: var(--primary-color);
-    color: #ffffff;
+    color: #fff;
+    border: 1px solid transparent;
+    min-width: 100px;
+    transition: all 0.3s ease;
+}
+.follow-btn.loading {
+    background: transparent;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    opacity: 0.7;
+    cursor: default;
+}
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.follow-btn.active {
+    background-color: transparent;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
 }
 
 
