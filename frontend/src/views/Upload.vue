@@ -73,14 +73,22 @@
             <!-- Step 2: Details -->
             <div v-if="currentStep === 2">
               <form class="details-area">
-                <div class="input-field">
-                  <label for="title">Title:</label>
-                  <input id="title" v-model="fileDetails.title" type="text" placeholder="Enter title" />
-                </div>
-                <div class="input-field">
-                  <label for="description">Description:</label>
-                  <textarea id="description" v-model="fileDetails.description" placeholder="Enter description"></textarea>
-                </div>
+                <FormInput
+                  id="title"
+                  label="Title"
+                  type="text"
+                  v-model="fileDetails.title"
+                  placeholder="Enter title"
+                  required
+                />
+                <FormInput
+                  id="description"
+                  label="Description"
+                  type="textarea"
+                  v-model="fileDetails.description"
+                  placeholder="Enter description"
+                  required
+                />
                 <div class="input-field">
                   <label for="category">Category:</label>
                   <select id="category" v-model="fileDetails.categoryId">
@@ -99,17 +107,38 @@
             <!-- Step 3: Done -->
             <div v-if="currentStep === 3">
               <div class="done-area">
-                <h2>Thanks for sharing</h2>
-                <p v-if="!errorMessage">Your file "{{ uploadedFile.name }}" has been successfully submitted with the following details:</p>
-                <p v-if="errorMessage">{{ errorMessage }}</p>
-                <ul v-if="!errorMessage">
-                  <li><strong>Title:</strong> {{ fileDetails.title }}</li>
-                  <li><strong>Description:</strong> {{ fileDetails.description }}</li>
-                  <li><strong>Category:</strong> {{ getCategoryName(fileDetails.categoryId) }}</li>
-                </ul>
+                <div class="success-icon">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="24" fill="#E6F7F0"/>
+                    <path d="M32 16L20 28L16 24" stroke="#42B983" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <h2 class="done-title">Thanks for sharing!</h2>
+                <p v-if="!errorMessage" class="done-message">Your file "{{ uploadedFile.name }}" has been successfully submitted with the following details:</p>
+                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                <div v-if="!errorMessage" class="details-list">
+                  <div class="detail-item">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value">{{ fileDetails.title }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">{{ fileDetails.description }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value">{{ getCategoryName(fileDetails.categoryId) }}</span>
+                  </div>
+                </div>
                 <div class="navigation">
-                    <button @click="$router.push('/')" class="default-btn">Home</button>
-                    <button @click="resetForm" class="default-btn">Upload more</button>
+                  <button @click="$router.push('/')" class="default-btn home-btn">
+                    <HomeIcon/>
+                    Home
+                  </button>
+                  <button @click="resetForm" class="default-btn upload-more-btn">
+                    <PlusIcon/>
+                    Upload More
+                  </button>
                 </div>
               </div>
             </div>
@@ -123,8 +152,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import Logo from '@/assets/images/logo.vue';
-import { UploadPic, DocumentIcon, TrashIcon } from '@/components/icons';
+import { UploadPic, DocumentIcon, TrashIcon, HomeIcon, PlusIcon } from '@/components/icons';
 import ProgressBar from '@/components/common/ProgressBar.vue';
+import FormInput from '@/components/common/FormInput.vue';
 import { createPost } from '@/services/postService';
 import { fetchCategories } from '@/services/categoryService';
 
@@ -471,75 +501,50 @@ const getCategoryName = (categoryId) => {
 .nav-btn:disabled{
     background: #9ea9b5;
 }
-.input-field{
+.input-field {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
 }
-.input-field label{
-    display: flex;
-    align-items: center;
+
+.input-field label {
     font-size: 16px;
     font-weight: 500;
     color: var(--text-color-light);
-    margin: 0 0 8px;
-    width: 170px;
 }
-.input-field select{
+
+.input-field select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     background-color: #fff;
-    background-image: none;
-    border: 1px solid #d3d9e0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239EA9B5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: none;
-    color: #2f3e4e;
+    color: var(--text-color);
     display: block;
     font-size: 16px;
-    height: 40px;
+    height: 48px;
     line-height: 130%;
-    padding: 8px 36px 8px 12px;
-    transition: border-color .3s;
+    padding: 8px 36px 8px 16px;
+    transition: all 0.2s ease;
     width: 100%;
 }
-.input-field input{
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-color: #fff;
-    background-image: none;
-    border: 1px solid #d3d9e0;
-    border-radius: 12px;
-    box-shadow: none;
-    color: #2f3e4e;
-    display: block;
-    font-size: 16px;
-    height: 40px;
-    line-height: 130%;
-    padding: 8px 12px;
-    transition: border-color .3s;
-    width: 100%;
+
+.input-field select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(66, 185, 131, 0.1);
 }
-.input-field textarea{
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-color: #fff;
-    background-image: none;
-    border: 1px solid #d3d9e0;
-    border-radius: 12px;
-    box-shadow: none;
-    color: #2f3e4e;
-    display: block;
-    font-size: 16px;
-    font-family: var(--font-family);
-    height: 40px;
-    line-height: 130%;
-    min-height: 40px;
-    padding: 8px 12px;
-    resize: vertical;
-    transition: border-color .3s;
-    width: 100%;
-    min-height: 100px;
+
+.input-field select:disabled {
+    background-color: #f8fafc;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 /* Add basic styling for new sections */
@@ -556,5 +561,164 @@ const getCategoryName = (categoryId) => {
 .done-area ul {
   list-style-type: none;
   padding: 0;
+}
+
+.done-area {
+    border: 1px solid #e6ebef;
+    background: white;
+    border-radius: 24px;
+    margin-bottom: 24px;
+    padding: 40px;
+    text-align: center;
+}
+
+.success-icon {
+    margin-bottom: 24px;
+    animation: scale-in 0.5s ease-out;
+}
+
+.done-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    animation: slide-up 0.5s ease-out;
+}
+
+.done-message {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0 0 32px 0;
+    animation: slide-up 0.5s ease-out 0.1s;
+}
+
+.error-message {
+    color: #ef4444;
+    background-color: #fee2e2;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin: 0 0 32px 0;
+    animation: shake 0.5s ease-in-out;
+}
+
+.details-list {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    text-align: left;
+    animation: slide-up 0.5s ease-out 0.2s;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-item:first-child {
+    padding-top: 0;
+}
+
+.detail-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: var(--text-color);
+    word-break: break-word;
+}
+
+.navigation {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    animation: slide-up 0.5s ease-out 0.3s;
+}
+
+.home-btn, .upload-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 160px;
+    transition: all 0.2s ease;
+}
+
+.home-btn {
+    background-color: #f8fafc;
+    color: var(--text-color);
+}
+
+.home-btn:hover {
+    background-color: var(--primary-color-10);
+    color: var(--primary-color);
+}
+
+.upload-more-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.upload-more-btn:hover {
+    background-color: #369f6e;
+    box-shadow: 0 4px 12px rgba(66, 185, 131, 0.2);
+}
+
+@keyframes scale-in {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .done-area {
+        padding: 24px;
+    }
+
+    .done-title {
+        font-size: 24px;
+    }
+
+    .navigation {
+        flex-direction: column;
+    }
+
+    .home-btn, .upload-more-btn {
+        width: 100%;
+    }
 }
 </style>

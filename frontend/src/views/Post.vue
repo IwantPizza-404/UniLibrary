@@ -149,6 +149,7 @@ import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchPost, votePost } from '@/services/postService';
 import { useAuthStore } from '@/store/authStore';
+import { formatDate } from '@/utils/utils';
 import { LikeIcon, DislikeIcon, CategoryIcon, DownloadIcon } from '@/components/icons';
 
 const authStore = useAuthStore();
@@ -170,14 +171,6 @@ const isDocx = computed(() => {
 const isPdf = computed(() => {
   return post.value?.file_url?.match(/\.pdf$/i);
 });
-
-const formatDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
 
 const loadDocxContent = async (fileUrl) => {
   docxLoading.value = true;

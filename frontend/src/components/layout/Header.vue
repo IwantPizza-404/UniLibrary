@@ -10,11 +10,18 @@
 
       <!-- Search Bar Section -->
       <div class="search-bar">
-        <input
-          type="text"
-          placeholder="Search for documents, notes, or files"
-          class="search-input"
-        />
+        <div class="search-input">
+          <div class="search-icon">
+            <SearchIcon/>
+          </div>
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search for documents, notes, or files"
+            class="search_input"
+            @keydown.enter="handleSearch"
+          />
+        </div>
         <ul class="nav-links">
           <li>
             <router-link to="/about" class="nav-link">About</router-link>
@@ -72,13 +79,29 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/store/authStore.js';
+import { useRouter, useRoute } from 'vue-router';
 import Logo from '@/assets/images/logo.vue';
-import { UserIcon, LogoutIcon } from '@/components/icons';
+import { UserIcon, LogoutIcon, SearchIcon } from '@/components/icons';
 
 // Access the authentication store
 const authStore = useAuthStore();
+const route = useRoute();
+const router = useRouter();
+
+// Search state
+const searchQuery = ref('');
+
+// Handle search
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({
+      path: '/search',
+      query: { q: searchQuery.value.trim() }
+    });
+  }
+};
 
 // Computed properties for authentication state
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -91,6 +114,12 @@ const isDropdownOpen = ref(false);
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
+
+watch(() => route.query.q, (newQuery) => {
+  if (newQuery) {
+    searchQuery.value = newQuery;
+  }
+}, { immediate: true });
 
 // Handle logout action
 const handleLogout = () => {
@@ -138,11 +167,16 @@ const handleLogout = () => {
   gap: 24px;
 }
 
-.search-input {
+.search-input{
+  position: relative;
+  width: 100%;
   max-width: 480px;
+}
+
+.search_input {
   width: 100%;
   height: 40px;
-  padding: 8px 16px;
+  padding: 8px 16px 8px 46px;
   border: 1px solid var(--border-color); /* Light gray border */
   border-radius: 25px;
   font-size: 16px;
@@ -150,8 +184,16 @@ const handleLogout = () => {
   transition: border-color 0.2s;
 }
 
-.search-input:focus {
+.search_input:focus {
   border-color: var(--primary-color); /* Blue border on focus */
+}
+
+.search-icon{
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  display: flex;
 }
 
 /* Navigation links */

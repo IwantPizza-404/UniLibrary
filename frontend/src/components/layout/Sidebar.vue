@@ -2,30 +2,37 @@
   <aside class="sidebar">
     <div class="sidebar__header">
       <div class="user-card">
-        <img class="sidebar__avatar" src="/avatar.png" alt="User Avatar" />
+        <div v-if="loading" class="sidebar__avatar skeleton skeleton-avatar"></div>
+        <img v-else class="sidebar__avatar" src="/avatar.png" alt="User Avatar" />
         <div class="sidebar__info">
-          <RouterLink
-            v-if="authStore.isAuthenticated"
+          <div v-if="loading" class="skeleton skeleton-name"></div>
+          <router-link
+            v-else-if="authStore.isAuthenticated"
             :to="'/'+user.username"
             class="sidebar__name"
           >
             {{ profile.full_name }}
-          </RouterLink>
+          </router-link>
           <p v-else class="sidebar__name">{{ profile.full_name }}</p>
-          <p class="sidebar__email">{{ profile.email }}</p>
+          
+          <div v-if="loading" class="skeleton skeleton-email"></div>
+          <p v-else class="sidebar__email">{{ profile.email }}</p>
         </div>
       </div>
       <div class="user-stats">
         <div class="stat-item">
-          <span class="stat__value">{{ profile.followers_count }}</span>
+          <div v-if="loading" class="skeleton skeleton-stat-value"></div>
+          <span v-else class="stat__value">{{ profile.followers_count }}</span>
           <span class="stat__label">Followers</span>
         </div>
         <div class="stat-item">
-          <span class="stat__value">{{ profile.uploads_count }}</span>
+          <div v-if="loading" class="skeleton skeleton-stat-value"></div>
+          <span v-else class="stat__value">{{ profile.uploads_count }}</span>
           <span class="stat__label">Uploads</span>
         </div>
         <div class="stat-item">
-          <span class="stat__value">{{ profile.upvotes_count }}</span>
+          <div v-if="loading" class="skeleton skeleton-stat-value"></div>
+          <span v-else class="stat__value">{{ profile.upvotes_count }}</span>
           <span class="stat__label">Upvotes</span>
         </div>
       </div>
@@ -37,19 +44,21 @@
       </div>
     </div>
 
-    <nav class="sidebar__nav">
+    <nav class="sidebar__nav" role="navigation">
       <router-link
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
         class="sidebar__link"
         :class="{ active: isActive(item.to) }"
+        :aria-current="isActive(item.to) ? 'page' : undefined"
       >
         <component :is="item.icon" class="sidebar__icon" />
         <span>{{ item.label }}</span>
       </router-link>
     </nav>
   </aside>
+
 </template>
 
 <script setup>
@@ -62,6 +71,7 @@ import { fetchProfile } from '@/services/userService';
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const user = computed(() => authStore.user);
+const loading = ref(false);
 
 const profile = ref({
   full_name: 'Guest',
@@ -73,9 +83,16 @@ const profile = ref({
 
 // Fetch profile function
 const loadProfile = async () => {
-  const profileData = await fetchProfile();
-  if (profileData) {
-    profile.value = profileData;
+  loading.value = true;
+  try {
+    const profileData = await fetchProfile();
+    if (profileData) {
+      profile.value = profileData;
+    }
+  } catch (error) {
+    console.error('Failed to load profile:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -263,5 +280,45 @@ const navItems = [
 .toolbar {
   display: flex;
   width: 100%;
+}
+
+/* Skeleton Loader Styles */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skeleton-name {
+  width: 120px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.skeleton-email {
+  width: 160px;
+  height: 16px;
+}
+
+.skeleton-stat-value {
+  width: 40px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

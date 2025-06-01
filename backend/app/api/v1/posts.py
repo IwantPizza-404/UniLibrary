@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,15 +29,26 @@ async def get_posts(
 ):
     return await PostService.get_all(db, skip=skip, limit=limit)
 
-@router.get("/search", response_model=List[PostResponse])
-async def search_posts(
-    q: str = Query(..., min_length=1, description="Search query"),
+@router.get("/following", response_model=List[PostResponse])
+async def get_following_posts(
+    current_user=Depends(get_current_user),
     skip: int = 0,
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
 ):
-    """ Search for posts by title or description """
-    return await PostService.search(db, query=q, skip=skip, limit=limit)
+    return await PostService.get_following(db, user_id=current_user.id, skip=skip, limit=limit)
+
+@router.get("/search", response_model=List[PostResponse])
+async def search_posts(
+    q: str = Query(..., min_length=1, description="Search query"),
+    category_id: Optional[int] = Query(None, description="Optional category ID to filter results"),
+    sort: Optional[str] = Query(None, description="Sort order: 'recent' or 'relevant'"),
+    skip: int = 0,
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+):
+    """ Search for posts by title or description, optionally filtered by category and sorted """
+    return await PostService.search(db, query=q, category_id=category_id, sort=sort, skip=skip, limit=limit)
 
 @router.get("/search/category", response_model=List[PostResponse])
 async def search_posts_by_category(
@@ -46,7 +57,7 @@ async def search_posts_by_category(
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
 ):
-    """ Search for posts by category ID """
+    """ Get all posts from a specific category """
     return await PostService.search_by_category(db, category_id=category_id, skip=skip, limit=limit)
 
 @router.get("/{id}", response_model=PostResponse)

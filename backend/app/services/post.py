@@ -28,22 +28,8 @@ class PostService:
 
         try:
             post = await PostRepository.create(db, post_dict)
-            # Fetch the post with related data after creation
             post_with_details = await PostRepository.get_by_id(db, post.id)
-            return PostResponse(
-                id=post_with_details.id,
-                title=post_with_details.title,
-                description=post_with_details.description,
-                category_id=post_with_details.category_id,
-                file_url=post_with_details.file_url,
-                upvotes=post_with_details.upvotes,
-                downvotes=post_with_details.downvotes,
-                created_at=post_with_details.created_at,
-                rating_percentage=post_with_details.rating_percentage,
-                user_vote=None,
-                category=post_with_details.category,
-                author=post_with_details.author,
-            )
+            return post_with_details
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -56,24 +42,16 @@ class PostService:
         Retrieve all posts with pagination.
         """
         posts = await PostRepository.get_all(db, skip=skip, limit=limit)
-        return [
-            PostResponse(
-                id=post.id,
-                title=post.title,
-                description=post.description,
-                category_id=post.category_id,
-                file_url=post.file_url,
-                upvotes=post.upvotes,
-                downvotes=post.downvotes,
-                created_at=post.created_at,
-                rating_percentage=post.rating_percentage,
-                user_vote=None,
-                category=post.category,
-                author=post.author,
-            )
-            for post in posts
-        ]
-
+        return posts
+    
+    @staticmethod
+    async def get_following(db: AsyncSession, user_id: int, skip: int, limit: int) -> List[PostResponse]:
+        """
+        Retrieve all posts created by users the current user follows.
+        """
+        posts = await PostRepository.get_following(db, user_id=user_id, skip=skip, limit=limit)
+        return posts
+    
     @staticmethod
     async def get_by_id(db: AsyncSession, post_id: int, user_id: Optional[int] = None) -> PostResponse:
         """
@@ -120,23 +98,7 @@ class PostService:
             )
         
         posts = await PostRepository.get_by_user(db, user.id)
-        return [
-            PostResponse(
-                id=post.id,
-                title=post.title,
-                description=post.description,
-                category_id=post.category_id,
-                file_url=post.file_url,
-                upvotes=post.upvotes,
-                downvotes=post.downvotes,
-                created_at=post.created_at,
-                rating_percentage=post.rating_percentage,
-                user_vote=None,
-                category=post.category,
-                author=post.author,
-            )
-            for post in posts
-        ]
+        return posts
 
     @staticmethod
     async def delete(db: AsyncSession, post_id: int, current_user: dict):
@@ -180,7 +142,7 @@ class PostService:
         return str(file_path)
 
     @staticmethod
-    async def search(db: AsyncSession, query: str, skip: int, limit: int) -> List[PostResponse]:
+    async def search(db: AsyncSession, query: str, category_id: Optional[int] = None, sort: Optional[str] = None, skip: int = 0, limit: int = 10) -> List[PostResponse]:
         """
         Search for posts by title, description, or category.
         """
@@ -189,48 +151,16 @@ class PostService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Search query cannot be empty"
             )
-        posts = await PostRepository.search(db, query=query, skip=skip, limit=limit)
-        return [
-            PostResponse(
-                id=post.id,
-                title=post.title,
-                description=post.description,
-                category_id=post.category_id,
-                file_url=post.file_url,
-                upvotes=post.upvotes,
-                downvotes=post.downvotes,
-                created_at=post.created_at,
-                rating_percentage=post.rating_percentage,
-                user_vote=None,
-                category=post.category,
-                author=post.author,
-            )
-            for post in posts
-        ]
+        posts = await PostRepository.search(db, query=query, category_id=category_id, sort=sort, skip=skip, limit=limit)
+        return posts
 
     @staticmethod
-    async def search_by_category(db: AsyncSession, category_id: int, skip: int, limit: int) -> List[PostResponse]:
+    async def search_by_category(db: AsyncSession, category_id: int, skip: int = 0, limit: int = 10) -> List[PostResponse]:
         """
-        Search for posts by category ID.
+        Get all posts from a specific category.
         """
         posts = await PostRepository.search_by_category(db, category_id=category_id, skip=skip, limit=limit)
-        return [
-            PostResponse(
-                id=post.id,
-                title=post.title,
-                description=post.description,
-                category_id=post.category_id,
-                file_url=post.file_url,
-                upvotes=post.upvotes,
-                downvotes=post.downvotes,
-                created_at=post.created_at,
-                rating_percentage=post.rating_percentage,
-                user_vote=None,
-                category=post.category,
-                author=post.author,
-            )
-            for post in posts
-        ]
+        return posts
 
     @staticmethod
     async def _handle_file_upload(file: UploadFile) -> str:

@@ -51,8 +51,6 @@ export const createPost = async (formData, onProgress) => {
   }
 };
 
-// New functions for Home page
-
 export const fetchPopularPosts = async (skip = 0, limit = 6) => {
   try {
     const response = await api.get(`posts?skip=${skip}&limit=${limit}`);
@@ -69,7 +67,6 @@ export const fetchFollowingPosts = async (skip = 0, limit = 6) => {
     return response.data;
   } catch (error) {
     handleError(error, 'Failed to fetch following posts');
-    // Note: This might fail if the endpoint isn't implemented yet
     return [];
   }
 };
@@ -84,9 +81,20 @@ export const fetchPostsByCategory = async (categoryId, skip = 0, limit = 6) => {
   }
 };
 
-export const searchPosts = async (query, skip = 0, limit = 6) => {
+export const searchPosts = async (query, category_id = null, sort = null, skip = 0, limit = 6) => {
   try {
-    const response = await api.get(`posts/search?q=${encodeURIComponent(query)}&skip=${skip}&limit=${limit}`);
+    const params = new URLSearchParams({ 
+      q: query,
+      skip: skip,
+      limit: limit
+    });
+    if (category_id) {
+      params.append('category_id', category_id);
+    }
+    if (sort) {
+      params.append('sort', sort);
+    }
+    const response = await api.get(`/posts/search?${params.toString()}`);
     return response.data;
   } catch (error) {
     handleError(error, 'Failed to search posts');

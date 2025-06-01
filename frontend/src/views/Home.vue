@@ -4,8 +4,38 @@
       <!-- Popular section -->
       <section class="content-section">
         <h2 class="section-title">Popular</h2>
-        <div v-if="loadingPopular && !popularPosts.length" class="loading-state">
-          Loading popular posts...
+        <div v-if="loadingPopular && !popularPosts.length">
+          <swiper
+            :modules="[SwiperPagination, SwiperNavigation, SwiperFreeMode, SwiperMousewheel]"
+            :free-mode="true"
+            :slides-per-view="'auto'"
+            :space-between="20"
+            :navigation="true"
+            :mousewheel="{
+              forceToAxis: true,
+              sensitivity: 1,
+              releaseOnEdges: true
+            }"
+            :touch-ratio="1"
+            :touch-angle="45"
+            :touch-move-stop-propagation="true"
+            :resistance="true"
+            :resistance-ratio="0.85"
+            :observer="true"
+            :observeParents="true"
+            class="documents-swiper"
+          >
+            <swiper-slide v-for="n in 6" :key="`skeleton-${n}`">
+              <div class="document-card skeleton">
+                <div class="document-preview skeleton-preview"></div>
+                <div class="document-info">
+                  <div class="skeleton-title"></div>
+                  <div class="skeleton-type"></div>
+                  <div class="skeleton-rating"></div>
+                </div>
+              </div>
+            </swiper-slide>
+          </swiper>
         </div>
         <div v-else-if="!popularPosts.length" class="empty-state">
           No popular posts found.
@@ -33,7 +63,14 @@
             @reachEnd="onPopularReachEnd"
           >
             <swiper-slide v-for="post in popularPosts" :key="`popular-${post.id}`">
-              <div class="document-card" @click="navigateToPost(post.id)">
+              <div 
+                class="document-card"
+                @click="navigateToPost(post.id)"
+                role="button"
+                tabindex="0"
+                @keydown.enter="navigateToPost(post.id)"
+                aria-label="Open post"
+              >
                 <div class="document-preview">
                   <img :src="getDocumentPreviewImage(post)" alt="Document preview" class="preview-image">
                 </div>
@@ -62,8 +99,38 @@
       <!-- Following section -->
       <section v-if="isAuthenticated" class="content-section">
         <h2 class="section-title">Following</h2>
-        <div v-if="loadingFollowing && !followingPosts.length" class="loading-state">
-          Loading following posts...
+        <div v-if="loadingFollowing && !followingPosts.length">
+          <swiper
+            :modules="[SwiperPagination, SwiperNavigation, SwiperFreeMode, SwiperMousewheel]"
+            :free-mode="true"
+            :slides-per-view="'auto'"
+            :space-between="20"
+            :navigation="true"
+            :mousewheel="{
+              forceToAxis: true,
+              sensitivity: 1,
+              releaseOnEdges: true
+            }"
+            :touch-ratio="1"
+            :touch-angle="45"
+            :touch-move-stop-propagation="true"
+            :resistance="true"
+            :resistance-ratio="0.85"
+            :observer="true"
+            :observeParents="true"
+            class="documents-swiper"
+          >
+            <swiper-slide v-for="n in 6" :key="`skeleton-${n}`">
+              <div class="document-card skeleton">
+                <div class="document-preview skeleton-preview"></div>
+                <div class="document-info">
+                  <div class="skeleton-title"></div>
+                  <div class="skeleton-type"></div>
+                  <div class="skeleton-rating"></div>
+                </div>
+              </div>
+            </swiper-slide>
+          </swiper>
         </div>
         <div v-else-if="!followingPosts.length" class="empty-state">
           No posts from followed users yet.
@@ -91,7 +158,14 @@
             @reachEnd="onFollowingReachEnd"
           >
             <swiper-slide v-for="post in followingPosts" :key="`following-${post.id}`">
-              <div class="document-card" @click="navigateToPost(post.id)">
+              <div 
+                class="document-card"
+                @click="navigateToPost(post.id)"
+                role="button"
+                tabindex="0"
+                @keydown.enter="navigateToPost(post.id)"
+                aria-label="Open post"
+              >
                 <div class="document-preview">
                   <img :src="getDocumentPreviewImage(post)" alt="Document preview" class="preview-image">
                 </div>
@@ -108,9 +182,11 @@
                 </div>
               </div>
             </swiper-slide>
-            <div v-if="loadingFollowing" class="swiper-slide loading-slide">
-              <div class="loading-spinner"></div>
-            </div>
+            <swiper-slide v-if="loadingFollowing">
+              <div class="loading-slide">
+                <div class="loading-spinner"></div>
+              </div>
+            </swiper-slide>
           </swiper>
         </div>
       </section>
@@ -122,10 +198,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { LikeIcon } from '@/components/icons';
-import { 
-  fetchPopularPosts,
-  fetchFollowingPosts
-} from '@/services/postService';
+import { getDocumentPreviewImage } from '@/utils/utils';
+import { fetchPopularPosts, fetchFollowingPosts } from '@/services/postService';
 import { useAuthStore } from '@/store/authStore';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Navigation, FreeMode, Mousewheel } from 'swiper/modules';
@@ -205,26 +279,20 @@ const loadFollowingPosts = async (page = 1) => {
     }
   } catch (err) {
     console.error('Error loading following posts:', err);
-    // If the API fails or isn't implemented yet, we'll try to use popular posts as a fallback
-    // if (followingPosts.value.length === 0) {
-    //   await loadPopularPosts(1);
-    //   followingPosts.value = [...popularPosts.value];
-    //   hasMoreFollowing.value = hasMorePopular.value;
-    // }
   } finally {
     loadingFollowing.value = false;
   }
 };
 
-const loadMorePopular = () => {
+const loadMorePopular = async () => {
   if (hasMorePopular.value) {
-    loadPopularPosts(popularPage.value + 1);
+    await loadPopularPosts(popularPage.value + 1);
   }
 };
 
-const loadMoreFollowing = () => {
+const loadMoreFollowing = async () => {
   if (hasMoreFollowing.value) {
-    loadFollowingPosts(followingPage.value + 1);
+    await loadFollowingPosts(followingPage.value + 1);
   }
 };
 
@@ -241,45 +309,23 @@ const formatDate = (dateString) => {
   }).replace(/\//g, '-');
 };
 
-const getDocumentPreviewImage = (post) => {
-  // Return a data URL for a colored rectangle with the first letter of the title
-  const firstLetter = post.title.charAt(0).toUpperCase();
-  const canvas = document.createElement('canvas');
-  canvas.width = 400;
-  canvas.height = 300;
-  const ctx = canvas.getContext('2d');
-  
-  // Fill background
-  ctx.fillStyle = '#EAF2FD';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw letter
-  ctx.fillStyle = '#333';
-  ctx.font = 'bold 72px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(firstLetter, canvas.width / 2, canvas.height / 2);
-  
-  return canvas.toDataURL();
-};
-
-const onPopularReachEnd = () => {
+const onPopularReachEnd = async () => {
   if (hasMorePopular.value && !loadingPopular.value) {
-    loadMorePopular();
+    await loadMorePopular();
   }
 };
 
-const onFollowingReachEnd = () => {
+const onFollowingReachEnd = async () => {
   if (hasMoreFollowing.value && !loadingFollowing.value) {
-    loadMoreFollowing();
+    await loadMoreFollowing();
   }
 };
 
 onMounted(async () => {
-  await loadPopularPosts(1);
+  loadPopularPosts(1);
   
   if (isAuthenticated.value) {
-    await loadFollowingPosts(1);
+    loadFollowingPosts(1);
   }
 });
 </script>
@@ -492,5 +538,49 @@ onMounted(async () => {
 .documents-swiper :deep(.swiper-button-disabled) {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Skeleton Loader Styles */
+.skeleton {
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-preview {
+  background-color: #e6ebef;
+  border: 12px solid #e0e0e0;
+}
+
+.skeleton-title {
+  height: 16px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-type {
+  height: 14px;
+  width: 60%;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-rating {
+  height: 24px;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 </style>

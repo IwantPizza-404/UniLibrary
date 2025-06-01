@@ -10,6 +10,7 @@ import Post from '@/views/Post.vue';
 import NotFound from '@/views/NotFound.vue';
 import Upload from '@/views/Upload.vue';
 import MyLibrary from '@/views/MyLibrary.vue';
+import Search from '@/views/Search.vue';
 
 const routes = [
   { 
@@ -41,6 +42,12 @@ const routes = [
     name: 'upload',
     component: Upload,
     meta: { showUI: false, requiresAuth: true }
+  },
+  {
+    path: '/search',
+    name: 'search',
+    component: Search,
+    meta: { showUI: true }
   },
   { 
     path: '/post/:post_id',
